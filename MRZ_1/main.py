@@ -3,33 +3,17 @@ from formulas import *
 from picture_functions import *
 import random
 pic_binary = pic_to_binary('Pictures/hunter.jpg')
-print(len(pic_binary[0]))
 
 
+n = 16
+m = 9
+# convert rgb values into new ones [-1,1]
+new_pic_binary = convert_rgb(pic_binary)
+split = pic_matrix_split(new_pic_binary,n,m)
 
-# new_pic_binary = []
-# for row in pic_binary:
-#     new_row = []
-#     for pixel in row:
-#         new_pixel = []
-#         for rgb in pixel:
-#             new_pixel.append(0)
-#         new_row.append(new_pixel)
-#     new_pic_binary.append(new_row)
-#
-# print(len(new_pic_binary))
 
-new_pic_binary = []
-for row in range(len(pic_binary)):
-    new_row = []
-    for i in range(len(pic_binary[0])):
-        new_pixel = []
-        for j in range(len(pic_binary[0][0])):
-            new_pixel.append(pixel_color_to_digits(pic_binary[row][i][j]))
-        new_row.append(new_pixel)
-    new_pic_binary.append(new_row)
-
-pic_matrix_split(new_pic_binary,16,9)
+# recreate_pic_matrix(split, n,m)
+recreate_pic_matrix(split,16,9)
 
 # for i in range(40,43):
 #     print(new_pic_binary[i])
