@@ -88,6 +88,7 @@ def convert_vector_into_matrix(q_vector_row, n, m):
     # row of q-matrices
     q_matrices_rows = []
 
+    # the range of values
     start_id = 0
     end_id = 3
 
