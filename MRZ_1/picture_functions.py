@@ -45,10 +45,10 @@ def convert_rgb(pic_binary):
 # split the pic matrix into L pieces
 def pic_matrix_split(pic_matrix, n, m):
     # amount of q-matrices in col
-    q_amount_in_col = len(pic_matrix) // n
+    amount_in_col = len(pic_matrix) // n
 
     # all x_q_vectors in one
-    splitted_q_vectors = []
+    splitted_vectors = []
 
     # start values
     n1,m1 = 0,0
@@ -57,8 +57,8 @@ def pic_matrix_split(pic_matrix, n, m):
     count = 0 # amount of rows we've gone through
     # go through all the q-matrices
     # to make vectors
-    while count != q_amount_in_col:
-        splitted_q_vectors.append(create_splitted_vector(pic_matrix, m, n1,n2,m1,m2))
+    while count != amount_in_col:
+        splitted_vectors.append(create_splitted_vector(pic_matrix, m, n1,n2,m1,m2))
         count += 1
         n1 += n
         n2 += n
@@ -67,7 +67,7 @@ def pic_matrix_split(pic_matrix, n, m):
     # print('len of big vector ', len(splitted_q_vectors))
     # print('amount of vectors in row ', len(splitted_q_vectors[0]))
     # print('len of one q-vector ',len(splitted_q_vectors[0][0]))
-    return splitted_q_vectors
+    return splitted_vectors
 
 
 
@@ -78,12 +78,12 @@ def create_splitted_vector(pic_matrix, m, n1, n2, m1, m2):
 
     # go through the q-matrices in row
     while m2 <= len(pic_matrix[0]):
-        x_q_vector = [] # vector of one q-matrix
+        x_vector = [] # vector of one q-matrix
         for i in range(n1, n2):
             for j in range(m1, m2):
                 for k in range(len(pic_matrix[i][j])):
-                    x_q_vector.append(pic_matrix[i][j][k])
-        x_row_vector.append(x_q_vector)
+                    x_vector.append(pic_matrix[i][j][k])
+        x_row_vector.append(x_vector)
         # go to the next q-matrix in row
         m1 += m
         m2 += m
@@ -175,29 +175,26 @@ def img_matrix_split(pic_matrix, n, m):
             pic_matrix.append(new_row)
 
     # all x_q_vectors in one
-    splitted_q_vectors = []
+    splitted_vectors = []
 
     # start values
     n1,m1 = 0,0
     n2, m2 = n, m
 
-    q_amount_in_col = len(pic_matrix) // n
-    print(q_amount_in_col)
+    amount_in_col = len(pic_matrix) // n
+    # print(q_amount_in_col)
 
     count = 0 # amount of rows we've gone through
     # go through all the q-matrices
     # to make vectors
-    while count != q_amount_in_col:
-        splitted_q_vectors.append(create_img_vector(pic_matrix, m, n1,n2,m1,m2))
+    while count != amount_in_col:
+        splitted_vectors.append(create_img_vector(pic_matrix, m, n1,n2,m1,m2))
         count += 1
         n1 += n
         n2 += n
         m1 = 0
         m2 = m
-    # print('len of big vector ', len(splitted_q_vectors))
-    # print('amount of vectors in row ', len(splitted_q_vectors[0]))
-    # print('len of one q-vector ',len(splitted_q_vectors[0][0]))
-    return splitted_q_vectors, amount_of_cols_to_add, amount_of_rows_to_add
+    return splitted_vectors, amount_of_cols_to_add, amount_of_rows_to_add
 
 
 
@@ -206,12 +203,12 @@ def create_img_vector(pic_matrix, m, n1, n2, m1, m2):
     x_row_vector = [] # vector of q-matrices vectors
     # go through the q-matrices in row
     while m2 <= len(pic_matrix[0]):
-        x_q_vector = [] # vector of one q-matrix
+        x_vector = [] # vector of one q-matrix
         for i in range(n1, n2):
             for j in range(m1, m2):
                 for k in range(len(pic_matrix[i][j])):
-                    x_q_vector.append(pic_matrix[i][j][k])
-        x_row_vector.append(x_q_vector)
+                    x_vector.append(pic_matrix[i][j][k])
+        x_row_vector.append(x_vector)
 
         # go to the next q-matrix in row
         m1 += m
@@ -222,7 +219,7 @@ def create_img_vector(pic_matrix, m, n1, n2, m1, m2):
 # decompress image
 def decompress():
     # Y
-    y_matrix_from_file = recreate_matrix_from_file('y_matrix.npy')
+    y_matrix_from_file = recreate_matrix_from_file('compressed_matrix.npy')
     # W`
     w_matrix_second_layer = recreate_matrix_from_file('second_layer_matrix.npy')
 
@@ -245,11 +242,15 @@ def decompress():
     # create img matrix
     matrix = recreate_pic_matrix(pic_matrix, n, m, 0, 0)
     # recreate img from matrix
-    save_image(matrix, 'pic_from_compression')
+    save_image(matrix, 'pic_deompressed')
+    print('The decompression is DONE')
 
 
-# ns train
-def ns_train(pic_name):
+# nn train
+def nn_train():
+    print('Список картинок:')
+    print('- hamster.jpg\n- kilua.jpg\n- ovechka.jpg\n- cat.jpg')
+    pic_name = str(input('Введите название картинки: '))
     # get img matrix
     pic_path = 'Pictures/' + pic_name
     pic_binary = pic_to_binary(pic_path)
@@ -284,10 +285,6 @@ def ns_train(pic_name):
     w_matrix_first_layer = generate_weight_matrix(N, p)  # first layer matrix
     w_matrix_second_layer = matrix_transposition(w_matrix_first_layer)  # second layer matrix
 
-    # weight matrices from file
-    # w_matrix_first_layer = recreate_matrix_from_file(n, 'first_layer_matrix.npy')
-    # w_matrix_second_layer = recreate_matrix_from_file(m, 'second_layer_matrix.npy')
-
     # TRAIN CYCLE
     x1_matrix, amount_of_iterations, E = train_cycle(e, n, m, extra_rows, extra_cols, x_vector_of_vectors, w_matrix_first_layer, w_matrix_second_layer)
 
@@ -314,6 +311,50 @@ def ns_train(pic_name):
         print(w_matrix_second_layer[row])
 
 
+def vector_train(x_vector_of_vectors, w_matrix_first_layer, w_matrix_second_layer, E, row):
+    x_matrix_row = []
+    y_matrix_row = []
+    x1_matrix_row = []
+    for vector_id in range(len(x_vector_of_vectors[0])):
+        # X(i)
+        xi = x_vector_of_vectors[row][vector_id]
+        # because i need a 1xN matrix
+        # not just a N-sized vector
+        xi_vector = []
+        xi_vector.append(xi)
+        x_matrix_row.append(xi_vector)
+
+        # Y(i) = X(i) * W`
+        yi = matrix_multiplication(xi_vector, w_matrix_first_layer)
+        # print(len(yi[0]))
+        y_matrix_row.append(yi)
+
+        # X`(i) = Y(i) * W
+        x_i = matrix_multiplication(yi, w_matrix_second_layer)
+        x1_matrix_row.append(x_i)
+
+        # dX(i) = X`(i) - X(i)
+        dxi = matrix_difference(x_i, xi_vector)
+
+        # E(q) = sum(dX(q)i * dX(q)i), 1 <= i <= N
+        rmse_i = total_rmse(dxi)
+        E += rmse_i
+
+        # neurons training
+        w_matrix_second_layer = second_layer_neurons_training(0.005, w_matrix_second_layer, yi, dxi)
+        w_matrix_first_layer = first_layer_neurons_training(0.005, xi_vector, dxi, w_matrix_first_layer,
+                                                            w_matrix_second_layer)
+
+        w_matrix_second_layer = normalize_w_matrices(w_matrix_second_layer)
+        w_matrix_first_layer = normalize_w_matrices(w_matrix_first_layer)
+
+        # add matrices into the files
+        save_matrix(w_matrix_first_layer, 'first_layer_matrix.npy')
+        save_matrix(w_matrix_second_layer, 'second_layer_matrix.npy')
+
+    return w_matrix_first_layer, w_matrix_second_layer, x1_matrix_row, y_matrix_row, E
+
+
 def train_cycle(e, n, m, extra_rows, extra_cols, x_vector_of_vectors, w_matrix_first_layer, w_matrix_second_layer):
     # amount of iterations
     amount_of_iterations = 0
@@ -324,49 +365,9 @@ def train_cycle(e, n, m, extra_rows, extra_cols, x_vector_of_vectors, w_matrix_f
         y_matrix = []  # Y
         amount_of_iterations += 1
 
-        # go through each q-matrix
+        # go through each vector
         for row in range(len(x_vector_of_vectors)):
-            # rows for each matrix
-            y_matrix_row = []  # Y(i)
-            x_matrix_row = []  # X(i)
-            x1_matrix_row = []  # X`(i)
-            for vector_id in range(len(x_vector_of_vectors[0])):
-                # X(i)
-                xi = x_vector_of_vectors[row][vector_id]
-                # because i need a 1xN matrix
-                # not just a N-sized vector
-                xi_vector = []
-                xi_vector.append(xi)
-                x_matrix_row.append(xi_vector)
-
-                # Y(i) = X(i) * W`
-                yi = matrix_multiplication(xi_vector, w_matrix_first_layer)
-                # print(len(yi[0]))
-                y_matrix_row.append(yi)
-
-                # X`(i) = Y(i) * W
-                x_i = matrix_multiplication(yi, w_matrix_second_layer)
-                x1_matrix_row.append(x_i)
-
-                # dX(i) = X`(i) - X(i)
-                dxi = matrix_difference(x_i, xi_vector)
-
-                # E(q) = sum(dX(q)i * dX(q)i), 1 <= i <= N
-                rmse_i = total_rmse(dxi)
-                E += rmse_i
-
-                # neurons training
-                w_matrix_second_layer = second_layer_neurons_training(0.005, w_matrix_second_layer, yi, dxi)
-                w_matrix_first_layer = first_layer_neurons_training(0.005, xi_vector, dxi, w_matrix_first_layer,
-                                                                    w_matrix_second_layer)
-
-                w_matrix_second_layer = normalize_w_matrices(w_matrix_second_layer)
-                w_matrix_first_layer = normalize_w_matrices(w_matrix_first_layer)
-
-                # add matrices into the files
-                save_matrix(w_matrix_first_layer, 'first_layer_matrix.npy')
-                save_matrix(w_matrix_second_layer, 'second_layer_matrix.npy')
-
+            w_matrix_first_layer, w_matrix_second_layer, x1_matrix_row, y_matrix_row, E = vector_train(x_vector_of_vectors, w_matrix_first_layer, w_matrix_second_layer, E, row)
             x1_matrix.append(x1_matrix_row)
             y_matrix.append(y_matrix_row)
 
@@ -379,7 +380,7 @@ def train_cycle(e, n, m, extra_rows, extra_cols, x_vector_of_vectors, w_matrix_f
             file_size.write(str(m))
             file_size.close()
 
-            save_matrix(y_matrix, 'y_matrix.npy')
+            save_matrix(y_matrix, 'compressed_matrix.npy')
             file_y_matrix_size = open('y_matrix_size.txt', 'w')
             file_y_matrix_size.write(str(len(y_matrix)) + '\n')
             file_y_matrix_size.write(str(len(y_matrix[0])))
@@ -392,3 +393,42 @@ def train_cycle(e, n, m, extra_rows, extra_cols, x_vector_of_vectors, w_matrix_f
             save_image(mx, name)
 
     return x1_matrix, amount_of_iterations, E
+
+# compress the pic
+def compress():
+    print('Список картинок:')
+    print('- hamster.jpg\n- kilua.jpg\n- ovechka.jpg\n- cat.jpg')
+    pic_name = str(input('Введите название картинки: '))
+    print('Введите размеры:')
+    n = int(input('n: '))
+    m = int(input('m: '))
+    pic_path = 'Pictures/' + pic_name
+    pic_binary = pic_to_binary(pic_path)
+
+
+    # convert rgb values into new ones [-1,1]
+    new_pic_binary = convert_rgb(pic_binary)
+
+    # create vector of pixels rgb values
+    # Neural Network input vector
+    # of q-vectors
+    x_vector_of_vectors, extra_cols, extra_rows = img_matrix_split(new_pic_binary, n, m)
+
+    # W
+    w_matrix_first_layer = recreate_matrix_from_file('first_layer_matrix.npy')
+
+    pic_matrix = []
+    for row in range(len(x_vector_of_vectors)):
+        matrix_row = []
+        for id in range(len(x_vector_of_vectors[0])):
+            # Y(i) = X(i) * W`
+            xi = x_vector_of_vectors[row][id]
+            xi_vector = []
+            xi_vector.append(xi)
+            x_i = matrix_multiplication(xi_vector, w_matrix_first_layer)
+
+            matrix_row.append(x_i)
+        pic_matrix.append(matrix_row)
+
+    save_matrix(pic_matrix, 'compressed_matrix.npy')
+    print('the compression is DONE')
