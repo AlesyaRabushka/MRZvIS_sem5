@@ -59,6 +59,21 @@ def matrix_difference(matrix1, matrix2):
                 row.append((matrix1[row_id][col_id] - matrix2[row_id][col_id]))
             result_matrix.append(row)
         return result_matrix
+    else:
+        print("Error!")
+
+
+# function for MUTRIX SUMMARY
+def matrix_sum(matrix1, matrix2):
+    if len(matrix1) == len(matrix2) and len(matrix1[0]) == len(matrix2[0]):
+        result_matrix = generate_matrix(len(matrix1), len(matrix1[0]))
+        for row_index in range(len(matrix1)):
+            for col_index in range(len(matrix1[0])):
+                result_matrix[row_index][col_index] = matrix1[row_index][col_index]+matrix2[row_index][col_index]
+        return result_matrix
+    else:
+        print('Matrices cannot be summarized')
+
 
 
 # create a VECTOR from MATRIX
@@ -102,3 +117,34 @@ def abs_col(w_matrix, col_index):
         abs += w_matrix[row_id][col_index] * w_matrix[row_id][col_index]
     abs = sqrt(abs)
     return abs
+
+# calculate the ADAPTIVE STEP = a
+def adaptive_step(y_i):
+    arg = matrix_multiplication(y_i,matrix_transposition(y_i))
+    return (1/arg[0][0])
+
+
+# the training of neurons on the first layer
+# W(t+1) = W(t) - a * [X(i)]T * dX(i) * [W`(t)]T
+def first_layer_neurons_training(adaptive_step, xi, dx_i, w, w_):
+    first_arg = number_matrix_multiplication(adaptive_step, matrix_transposition(xi))
+    second_arg = matrix_multiplication(first_arg,dx_i)
+    third_arg = matrix_multiplication(second_arg, matrix_transposition(w_))
+    return matrix_difference(w, third_arg)
+
+
+# the training of neurons on the second layer
+# W`(t+1) = W`(t) - a` * [Y(i)]T * dX(i)
+def second_layer_neurons_training(adaptive_step, w, y_i, dx_i):
+    return matrix_difference(w, matrix_multiplication(number_matrix_multiplication(adaptive_step, matrix_transposition(y_i)), dx_i))
+
+
+
+# calculate total RMSE (root mean square error) = E(q)
+def total_rmse(d_x_vector):
+    rmse = 0
+    for i in d_x_vector[0]:
+        # take dx_vector[0][i] because the vector is actually
+        # a one row matrix
+        rmse  += (i**2)
+    return rmse
